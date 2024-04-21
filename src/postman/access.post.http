@@ -2,11 +2,11 @@
 
 
 ###Signup
-POST {{url_dev}}/shop/signupeee
-Content-Type: application/jsoneeee
+POST {{url_dev}}/shop/signup
+Content-Type: application/json
 
 {
     "name": "Shop Tips",
-    "email": "shoptips1@gmail.com",
+    "email": "shoptips8@gmail.com",
     "password": "abc123"
 }

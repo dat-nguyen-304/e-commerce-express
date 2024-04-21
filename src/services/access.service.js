@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const KeyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
+const { BadRequestError } = require("../core/error.response");
 
 
 const RoleShop = {
@@ -14,61 +15,47 @@ const RoleShop = {
 
 class AccessService {
     static signUp = async ({ name, email, password }) => {
-        try {
-            const holderShop = await shopModel.findOne({ email }).lean();
-            if (holderShop) {
-                return {
-                    code: 'XXX',
-                    message: 'Shop already exist'
-                }
-            }
+        const holderShop = await shopModel.findOne({ email }).lean();
+        if (holderShop) {
+            throw new BadRequestError('Error: Shop already registered');
+        }
 
-            const passwordHash = await bcrypt.hash(password, 10);
+        const passwordHash = await bcrypt.hash(password, 10);
 
-            const newShop = await shopModel.create({
-                name, email, password: passwordHash, roles: [RoleShop.SHOP]
+        const newShop = await shopModel.create({
+            name, email, password: passwordHash, roles: [RoleShop.SHOP]
+        });
+
+        if (newShop) {
+            const privateKey = crypto.randomBytes(64).toString('hex');
+            const publicKey = crypto.randomBytes(64).toString('hex');
+
+            console.log({ privateKey, publicKey });
+
+            const tokenStore = await KeyTokenService.createKeyToken({
+                userId: newShop._id,
+                publicKey,
+                privateKey
             });
 
-            if (newShop) {
-                const privateKey = crypto.randomBytes(64).toString('hex');
-                const publicKey = crypto.randomBytes(64).toString('hex');
+            if (!tokenStore) {
+                throw new BadRequestError('Can not create tokens');
+            }
 
-                console.log({ privateKey, publicKey });
+            const tokens = createTokenPair({ userId: newShop._id, email }, publicKey, privateKey);
+            console.log(`Created Token Success `, tokens);
 
-                const tokenStore = await KeyTokenService.createKeyToken({
-                    userId: newShop._id,
-                    publicKey,
-                    privateKey
-                });
-
-                if (!tokenStore) {
-                    return {
-                        code: 'XXX',
-                        message: 'token error'
-                    }
-                }
-                const tokens = createTokenPair({ userId: newShop._id, email }, publicKey, privateKey);
-                console.log(`Created Token Success `, tokens);
-
-                return {
-                    code: 201,
-                    metadata: {
-                        shop: getInfoData({ fields: ['_id', 'name', 'email'], object: newShop }),
-                        tokens
-                    }
+            return {
+                code: 201,
+                metadata: {
+                    shop: getInfoData({ fields: ['_id', 'name', 'email'], object: newShop }),
+                    tokens
                 }
             }
-            return {
-                code: 200,
-                metadata: null
-            }
-
-        } catch (error) {
-            return {
-                code: 'XXX',
-                message: error.message,
-                status: 'error'
-            }
+        }
+        return {
+            code: 200,
+            metadata: null
         }
     }
 }

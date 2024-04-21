@@ -14,17 +14,23 @@ app.use(compression()); //reduce size of data
 app.use(express.json());
 app.use(express.urlencoded({
     extended: true
-}))
-// checkOverload()
-// app.get('/', (req, res) => {
-//     const strCompress = "Hello tipjs";
-//     return res.status(200).json({
-//         message: "Welcome to Express",
-//         metadata: strCompress.repeat(10000)
-//     })
-// })
+}));
 
 app.use('/', require('./routes'));
+app.use((req, res, next) => {
+    const error = new Error('Not found!');
+    error.status = 404;
+    next(error);
+});
+
+app.use((error, req, res, next) => {
+    const statusCode = error.status || 500;
+    return res.status(statusCode).json({
+        status: 'error',
+        code: statusCode,
+        message: error.message || 'Internal Server Error'
+    })
+});
 
 
 module.exports = app;

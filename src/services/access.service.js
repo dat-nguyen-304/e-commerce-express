@@ -4,7 +4,8 @@ const crypto = require("crypto");
 const KeyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
-const { BadRequestError } = require("../core/error.response");
+const { BadRequestError, UnauthorizedRequestError } = require("../core/error.response");
+const { findByEmail } = require("./shop.service");
 
 
 const RoleShop = {
@@ -14,6 +15,35 @@ const RoleShop = {
 }
 
 class AccessService {
+    static login = async ({ email, password, refreshToken = null }) => {
+        const foundShop = await findByEmail(email);
+        if (!foundShop) throw new BadRequestError('Shop is not registered');
+        const match = bcrypt.compare(password, foundShop.password);
+        if (!match) throw new UnauthorizedRequestError('Authentication error');
+
+        const privateKey = crypto.randomBytes(64).toString('hex');
+        const publicKey = crypto.randomBytes(64).toString('hex');
+
+        const tokens = createTokenPair({ userId: foundShop._id, email }, publicKey, privateKey);
+
+        const keyStore = await KeyTokenService.createKeyToken({
+            userId: foundShop._id,
+            refreshToken: tokens.refreshToken,
+            publicKey,
+            privateKey
+        });
+
+        if (!keyStore) {
+            throw new BadRequestError('Can not create keys');
+        }
+
+        return {
+            shop: getInfoData({ fields: ['_id', 'name', 'email'], object: foundShop }),
+            tokens
+        }
+    }
+
+
     static signUp = async ({ name, email, password }) => {
         const holderShop = await shopModel.findOne({ email }).lean();
         if (holderShop) {
@@ -32,14 +62,14 @@ class AccessService {
 
             console.log({ privateKey, publicKey });
 
-            const tokenStore = await KeyTokenService.createKeyToken({
+            const keyStore = await KeyTokenService.createKeyToken({
                 userId: newShop._id,
                 publicKey,
                 privateKey
             });
 
-            if (!tokenStore) {
-                throw new BadRequestError('Can not create tokens');
+            if (!keyStore) {
+                throw new BadRequestError('Can not create keys');
             }
 
             const tokens = createTokenPair({ userId: newShop._id, email }, publicKey, privateKey);

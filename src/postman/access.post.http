@@ -4,9 +4,21 @@
 ###Signup
 POST {{url_dev}}/shop/signup
 Content-Type: application/json
+x-api-key: 05d81888fc9b5a7a71ef08ec8069c6205ab5adf8a587363cc2330d045ec2ae966c5abaaaf86aa12f74e5056d38a057ab62c6d85bb5f8ceb9ee43b04c997a313d
 
 {
     "name": "Shop Tips",
-    "email": "shoptips8@gmail.com",
+    "email": "shoptips1@gmail.com",
+    "password": "abc123"
+}
+
+//-------------------------------
+###Login
+POST {{url_dev}}/shop/login
+Content-Type: application/json
+x-api-key: 05d81888fc9b5a7a71ef08ec8069c6205ab5adf8a587363cc2330d045ec2ae966c5abaaaf86aa12f74e5056d38a057ab62c6d85bb5f8ceb9ee43b04c997a313d
+
+{
+    "email": "shoptips1@gmail.com",
     "password": "abc123"
 }

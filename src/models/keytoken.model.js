@@ -18,13 +18,17 @@ var keyTokenSchema = new Schema({
         type: String,
         required: true
     },
-    refreshToken: {
+    refreshTokensUsed: {
         type: Array,
         default: []
+    },
+    refreshToken: {
+        type: String,
+        require: true
     }
 }, {
     collection: COLLECTION_NAME,
-    timestamp: true
+    timestamps: true
 });
 
 //Export the model

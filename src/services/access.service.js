@@ -4,7 +4,7 @@ const crypto = require("crypto");
 const KeyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
-const { BadRequestError, UnauthorizedRequestError } = require("../core/error.response");
+const { BadRequestError, UnauthorizedError } = require("../core/error.response");
 const { findByEmail } = require("./shop.service");
 
 
@@ -19,7 +19,7 @@ class AccessService {
         const foundShop = await findByEmail(email);
         if (!foundShop) throw new BadRequestError('Shop is not registered');
         const match = bcrypt.compare(password, foundShop.password);
-        if (!match) throw new UnauthorizedRequestError('Authentication error');
+        if (!match) throw new UnauthorizedError('Authentication error');
 
         const privateKey = crypto.randomBytes(64).toString('hex');
         const publicKey = crypto.randomBytes(64).toString('hex');
@@ -43,6 +43,11 @@ class AccessService {
         }
     }
 
+    static logout = async (keyStore) => {
+        const delKey = await KeyTokenService.removeTokenById(keyStore._id);
+        console.log({ delKey });
+        return delKey;
+    }
 
     static signUp = async ({ name, email, password }) => {
         const holderShop = await shopModel.findOne({ email }).lean();

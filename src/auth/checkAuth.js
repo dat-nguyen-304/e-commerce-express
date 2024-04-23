@@ -1,4 +1,4 @@
-const { findById } = require("../services/apikey.service");
+const ApiKeyService = require("../services/apikey.service");
 
 const HEADER = {
     API_KEY: 'x-api-key',
@@ -14,7 +14,7 @@ const apiKey = async (req, res, next) => {
                 message: 'Forbidden error'
             })
         }
-        const objKey = await findById(key);
+        const objKey = await ApiKeyService.findById(key);
         if (!objKey) {
             return res.status(403).json({
                 message: 'Forbidden error'

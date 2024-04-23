@@ -31,17 +31,17 @@ const createTokenPair = (payload, publicKey, privateKey) => {
         return { accessToken, refreshToken };
 
     } catch (error) {
-
+        console.log({ error });
     }
 }
 
 const authentication = asyncHandler(async (req, res, next) => {
     const userId = req.headers[HEADER.CLIENT_ID];
-    if (!userId) throw new BadRequestError('Invalid request');
+    if (!userId) throw new BadRequestError('Need x-api-key');
     const keyStore = await findByUserId(userId);
     if (!keyStore) throw NotFoundError('Not found key store');
     const accessToken = req.headers[HEADER.AUTHORIZATION];
-    if (!accessToken) throw UnauthorizedError('Invalid request');
+    if (!accessToken) throw UnauthorizedError('Need access token');
 
     try {
         const decodeUser = JWT.verify(accessToken, keyStore.publicKey);
@@ -54,7 +54,12 @@ const authentication = asyncHandler(async (req, res, next) => {
 
 })
 
+const verifyJWT = (token, key) => {
+    return JWT.verify(token, key);
+}
+
 module.exports = {
     createTokenPair,
-    authentication
+    authentication,
+    verifyJWT
 }

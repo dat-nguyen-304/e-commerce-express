@@ -2,9 +2,9 @@ const shopModel = require("../models/shop.model");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const KeyTokenService = require("./keyToken.service");
-const { createTokenPair } = require("../auth/authUtils");
+const { createTokenPair, verifyJWT } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
-const { BadRequestError, UnauthorizedError } = require("../core/error.response");
+const { BadRequestError, UnauthorizedError, ForbiddenError } = require("../core/error.response");
 const { findByEmail } = require("./shop.service");
 
 
@@ -86,6 +86,29 @@ class AccessService {
             }
         }
         return null;
+    }
+
+    static handleRefreshToken = async (refreshToken) => {
+        const foundToken = await KeyTokenService.findByRefreshTokenUsed(refreshToken);
+        if (foundToken) {
+            const { userId } = verifyJWT(refreshToken, foundToken.privateKey);
+            await KeyTokenService.deleteKeyById(userId);
+            throw new ForbiddenError('Something went wrong');
+        }
+
+        const holderToken = await KeyTokenService.findByRefreshToken(refreshToken);
+        if (!holderToken) throw BadRequestError('Can not refresh');
+        const { userId, email } = verifyJWT(refreshToken, holderToken.privateKey);
+        const foundShop = await findByEmail(email);
+        if (!foundShop) throw BadRequestError('Shop is not registered');
+        const tokens = createTokenPair({ userId, email }, holderToken.publicKey, holderToken.privateKey);
+
+        await KeyTokenService.updateRefreshToken(refreshToken, tokens.refreshToken);
+
+        return {
+            user: { userId, email },
+            tokens
+        }
     }
 }
 

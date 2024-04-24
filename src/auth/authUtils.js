@@ -1,12 +1,13 @@
 const JWT = require('jsonwebtoken');
 const asyncHandler = require('../helpers/asyncHandler');
 const { BadRequestError, NotFoundError, UnauthorizedError } = require('../core/error.response');
-const { findByUserId } = require('../services/keyToken.service');
+const KeyTokenService = require('../services/keyToken.service');
 
 const HEADER = {
     API_KEY: 'x-api-key',
     CLIENT_ID: 'x-client-id',
-    AUTHORIZATION: 'authorization'
+    AUTHORIZATION: 'authorization',
+    REFRESH_TOKEN: 'x-rtoken-id'
 }
 
 
@@ -38,21 +39,41 @@ const createTokenPair = (payload, publicKey, privateKey) => {
 const authentication = asyncHandler(async (req, res, next) => {
     const userId = req.headers[HEADER.CLIENT_ID];
     if (!userId) throw new BadRequestError('Need x-api-key');
-    const keyStore = await findByUserId(userId);
-    if (!keyStore) throw NotFoundError('Not found key store');
+    const keyStore = await KeyTokenService.findByUserId(userId);
+    if (!keyStore) throw new NotFoundError('Not found key store');
     const accessToken = req.headers[HEADER.AUTHORIZATION];
-    if (!accessToken) throw UnauthorizedError('Need access token');
+    if (!accessToken) throw new UnauthorizedError('Need access token');
 
     try {
         const decodeUser = JWT.verify(accessToken, keyStore.publicKey);
-        if (userId !== decodeUser.userId) throw UnauthorizedError('Invalid userId');
+        if (userId !== decodeUser.userId) throw new UnauthorizedError('Invalid userId');
         req.keyStore = keyStore;
         req.user = decodeUser;
         return next();
     } catch (error) {
         throw error;
     }
+})
 
+const checkRefreshToken = asyncHandler(async (req, res, next) => {
+    const userId = req.headers[HEADER.CLIENT_ID];
+    if (!userId) throw new BadRequestError('Need x-api-key');
+    const keyStore = await KeyTokenService.findByUserId(userId);
+    if (!keyStore) throw new NotFoundError('Not found key store');
+
+    const refreshToken = req.headers[HEADER.REFRESH_TOKEN];
+    if (!refreshToken) throw new UnauthorizedError('Need refresh token');
+
+    try {
+        const decodeUser = JWT.verify(refreshToken, keyStore.privateKey);
+        if (userId !== decodeUser.userId) throw new UnauthorizedError('Invalid userId');
+        req.keyStore = keyStore;
+        req.user = decodeUser;
+        req.refreshToken = refreshToken;
+        return next();
+    } catch (error) {
+        throw error;
+    }
 })
 
 const verifyJWT = (token, key) => {
@@ -62,5 +83,6 @@ const verifyJWT = (token, key) => {
 module.exports = {
     createTokenPair,
     authentication,
+    checkRefreshToken,
     verifyJWT
 }

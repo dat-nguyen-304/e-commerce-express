@@ -11,6 +11,44 @@ class ProductController {
             }),
         }).send(res);
     }
+
+    getAllDraftsForShop = async (req, res, next) => {
+        new OK({
+            message: 'Get draft list successfully',
+            metadata: await ProductService.findAllDraftsForShop({
+                product_shop: req.user.userId
+            })
+        }).send(res);
+    }
+
+    getAllPublishForShop = async (req, res, next) => {
+        new OK({
+            message: 'Get publish list successfully',
+            metadata: await ProductService.findAllPublishForShop({
+                product_shop: req.user.userId
+            })
+        }).send(res);
+    }
+
+    publishProductByShop = async (req, res, next) => {
+        new OK({
+            message: 'Publish product successfully',
+            metadata: await ProductService.publishProductByShop({
+                product_shop: req.user.userId,
+                product_id: req.params.id
+            })
+        }).send(res);
+    }
+
+    unpublishProductByShop = async (req, res, next) => {
+        new OK({
+            message: 'Unpublish product successfully',
+            metadata: await ProductService.unpublishProductByShop({
+                product_shop: req.user.userId,
+                product_id: req.params.id
+            })
+        }).send(res);
+    }
 }
 
 module.exports = new ProductController();

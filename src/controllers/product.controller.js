@@ -12,6 +12,20 @@ class ProductController {
         }).send(res);
     }
 
+    getAllProducts = async (req, res, next) => {
+        new OK({
+            message: 'Get all products successfully',
+            metadata: await ProductService.findAllProducts(req.query)
+        }).send(res);
+    }
+
+    getProduct = async (req, res, next) => {
+        new OK({
+            message: 'Get product successfully',
+            metadata: await ProductService.findProductById({ product_id: req.params.product_id })
+        }).send(res);
+    }
+
     getAllDraftsForShop = async (req, res, next) => {
         new OK({
             message: 'Get draft list successfully',

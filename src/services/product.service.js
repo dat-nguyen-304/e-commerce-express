@@ -2,6 +2,7 @@ const { product, clothing, electronic, furniture } = require('../models/product.
 const { BadRequestError } = require('../core/error.response');
 const { findAllDraftsForShop, findAllPublishForShop, publishProductByShop, unpublishProductByShop, searchProducts, findAllProducts, findProductById, updateProductById } = require('../repositories/product.repo');
 const { removeUndefinedObject, updateNestedObjectParser } = require('../utils');
+const { insertInventory } = require('../repositories/inventory.repo');
 
 class ProductFactory {
     static productRegistry = {};
@@ -70,7 +71,15 @@ class Product {
     }
 
     async createProduct (product_id) {
-        return await product.create({ ...this, _id: product_id });
+        const newProduct = await product.create({ ...this, _id: product_id });
+        if (newProduct) {
+            await insertInventory({
+                productId: newProduct._id,
+                shopId: newProduct.product_shop,
+                stock: newProduct.product_quantity
+            })
+        }
+        return newProduct;
     }
 
     async updateProduct (productId, payload) {

@@ -4,7 +4,6 @@ const { getSelectData, unGetSelectData } = require("../utils");
 
 const findAllDraftsForShop = async ({ query, limit, skip }) => {
     return await queryProduct({ query, limit, skip });
-
 }
 
 const findAllProducts = async ({ limit, sort, page, filter, select }) => {

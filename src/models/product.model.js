@@ -1,123 +1,134 @@
 const { model, Schema } = require('mongoose');
-const slugify = require("slugify");
+const slugify = require('slugify');
 
 const DOCUMENT_NAME = 'Product';
 const COLLECTION_NAME = 'Products';
 
 // Declare the Schema of the Mongo model
-var productSchema = new Schema({
+var productSchema = new Schema(
+  {
     product_name: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     product_thumb: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     product_description: {
-        type: String
+      type: String,
     },
     product_slug: {
-        type: String
+      type: String,
     },
     product_price: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
     product_quantity: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
     product_type: {
-        type: String,
-        required: true,
-        enum: ['Electronic', 'Clothing', 'Furniture']
+      type: String,
+      required: true,
+      enum: ['Electronic', 'Clothing', 'Furniture'],
     },
     product_shop: {
-        type: Schema.Types.ObjectId,
-        ref: 'Shop'
+      type: Schema.Types.ObjectId,
+      ref: 'Shop',
     },
     product_attributes: {
-        type: Schema.Types.Mixed,
-        required: true,
+      type: Schema.Types.Mixed,
+      required: true,
     },
     product_rating: {
-        type: Number,
-        default: 5,
-        min: [1, 'Rating must be >= 1'],
-        max: [5, 'Rating must be <= 5'],
-        set: (val) => Math.round(val * 10) / 10
+      type: Number,
+      default: 5,
+      min: [1, 'Rating must be >= 1'],
+      max: [5, 'Rating must be <= 5'],
+      set: (val) => Math.round(val * 10) / 10,
     },
     product_variations: {
-        type: Array,
-        default: []
+      type: Array,
+      default: [],
     },
     isDraft: { type: Boolean, default: true, index: true, select: false },
     isPublished: { type: Boolean, default: false, index: true, select: false },
-}, {
+  },
+  {
     timestamps: true,
-    collection: COLLECTION_NAME
-});
+    collection: COLLECTION_NAME,
+  },
+);
 
 productSchema.index({ product_name: 'text', product_description: 'text' });
 
 productSchema.pre('save', function (next) {
-    this.product_slug = slugify(this.product_name, { lower: true });
-    next();
-})
+  this.product_slug = slugify(this.product_name, { lower: true });
+  next();
+});
 
-
-const clothingSchema = new Schema({
+const clothingSchema = new Schema(
+  {
     brand: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     size: {
-        type: String,
+      type: String,
     },
     material: {
-        type: String,
-    }
-}, {
+      type: String,
+    },
+  },
+  {
     collection: 'Clothes',
-    timestamps: true
-})
+    timestamps: true,
+  },
+);
 
-const electronicSchema = new Schema({
+const electronicSchema = new Schema(
+  {
     brand: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     size: {
-        type: String,
+      type: String,
     },
     material: {
-        type: String,
-    }
-}, {
+      type: String,
+    },
+  },
+  {
     collection: 'Electronics',
-    timestamps: true
-})
+    timestamps: true,
+  },
+);
 
-const furnitureSchema = new Schema({
+const furnitureSchema = new Schema(
+  {
     brand: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     size: {
-        type: String,
+      type: String,
     },
     material: {
-        type: String,
-    }
-}, {
+      type: String,
+    },
+  },
+  {
     collection: 'Furniture',
-    timestamps: true
-})
+    timestamps: true,
+  },
+);
 
 module.exports = {
-    product: model(DOCUMENT_NAME, productSchema),
-    electronic: model('Electronic', electronicSchema),
-    clothing: model('Clothing', clothingSchema),
-    furniture: model('Furniture', furnitureSchema)
-}
+  product: model(DOCUMENT_NAME, productSchema),
+  electronic: model('Electronic', electronicSchema),
+  clothing: model('Clothing', clothingSchema),
+  furniture: model('Furniture', furnitureSchema),
+};

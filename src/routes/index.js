@@ -1,5 +1,5 @@
-const express = require("express");
-const { permission, apiKey } = require("../auth/checkAuth");
+const express = require('express');
+const { permission, apiKey } = require('../auth/checkAuth');
 
 const router = express.Router();
 router.use(apiKey);

@@ -5,7 +5,8 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "nodemon server.js"
+        "start": "nodemon server.js",
+        "prettier:fix": "prettier --write \"**/(**.js)\""
     },
     "keywords": [],
     "author": "",
@@ -24,6 +25,7 @@
     "devDependencies": {
         "compression": "^1.7.4",
         "helmet": "^7.1.0",
-        "morgan": "^1.10.0"
+        "morgan": "^1.10.0",
+        "prettier": "^3.3.2"
     }
 }

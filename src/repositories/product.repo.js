@@ -5,7 +5,11 @@ const {
   clothing,
   furniture,
 } = require('../models/product.model');
-const { getSelectData, unGetSelectData } = require('../utils');
+const {
+  getSelectData,
+  unGetSelectData,
+  convertToObjectIdMongodb,
+} = require('../utils');
 
 const findAllDraftsForShop = async ({ query, limit, skip }) => {
   return await queryProduct({ query, limit, skip });
@@ -25,7 +29,9 @@ const findAllProducts = async ({ limit, sort, page, filter, select }) => {
 };
 
 const findProductById = async ({ product_id, unSelect }) => {
-  return await product.findById(product_id).select(unGetSelectData(unSelect));
+  return await product
+    .findById(convertToObjectIdMongodb(product_id))
+    .select(unGetSelectData(unSelect));
 };
 
 const findAllPublishForShop = async ({ query, limit, skip }) => {
@@ -91,6 +97,22 @@ const updateProductById = async ({
   return await model.findByIdAndUpdate(productId, payload, { new: isNew });
 };
 
+const checkProductByServer = async (products) => {
+  return await Promise.all(
+    products.map(async (product) => {
+      const foundProduct = await findProductById({
+        product_id: product.productId,
+      });
+      if (foundProduct)
+        return {
+          price: foundProduct.product_price,
+          quantity: product.quantity,
+          productId: product.productId,
+        };
+    }),
+  );
+};
+
 module.exports = {
   findAllDraftsForShop,
   publishProductByShop,
@@ -100,4 +122,5 @@ module.exports = {
   findAllProducts,
   findProductById,
   updateProductById,
+  checkProductByServer,
 };

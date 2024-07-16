@@ -1,5 +1,4 @@
 const { model, Schema } = require('mongoose');
-const slugify = require('slugify');
 
 const DOCUMENT_NAME = 'Cart';
 const COLLECTION_NAME = 'Carts';

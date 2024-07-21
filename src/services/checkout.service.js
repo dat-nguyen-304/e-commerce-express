@@ -61,7 +61,7 @@ class CheckoutService {
   }
 
   static async orderByUser({
-    shop_order_ids_new,
+    shop_order_ids,
     cartId,
     userId,
     user_address = {},
@@ -71,7 +71,7 @@ class CheckoutService {
       await CheckoutService.checkoutReview({
         cartId,
         userId,
-        shop_order_ids: shop_order_ids_new,
+        shop_order_ids: shop_order_ids,
       });
     const products = shop_order_ids_new.flatMap((order) => order.item_products);
     for (let i = 0; i < products.length; i++) {

@@ -3,8 +3,20 @@ const { promisify } = require('util');
 const { reservationInventory } = require('../repositories/inventory.repo');
 const redisClient = redis.createClient();
 
-const pexpire = promisify(redisClient.pexpire).bind(redisClient);
-const setnxAsync = promisify(redisClient.setnx).bind(redisClient);
+redisClient.on('error', (err) => console.log('Redis Client Error', err));
+
+redisClient
+  .connect()
+  .then(() => {
+    console.log('Connected');
+  })
+  .catch((err) => {
+    console.error('Redis Connection Error:', err);
+  });
+
+const pexpire = promisify(redisClient.pExpire).bind(redisClient);
+const setnxAsync = promisify(redisClient.setNX).bind(redisClient);
+const delAsync = promisify(redisClient.del).bind(redisClient);
 
 const acquireLock = async (productId, quantity, cartId) => {
   const key = `lock_2024_${productId}`;

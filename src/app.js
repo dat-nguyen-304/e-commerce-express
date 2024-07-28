@@ -4,6 +4,9 @@ const compression = require('compression');
 const { default: helmet } = require('helmet');
 require('./dbs/init.mongodb');
 const { checkOverload } = require('./helpers/check.connect');
+const ProductTest = require('./tests/product.test');
+require('./tests/inventory.test');
+ProductTest.purchaseProduct('product:001', 10);
 
 const app = express();
 

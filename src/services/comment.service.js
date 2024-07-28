@@ -1,9 +1,12 @@
 const { NotFoundError } = require('../core/error.response');
 const Comment = require('../models/comment.model');
 const { convertToObjectIdMongodb } = require('../utils');
+const ProductService = require('../services/product.service');
 
 class CommentService {
   static async createComment({ productId, userId, content, parentCommentId }) {
+    const foundProduct = await ProductService.findProductById({ productId });
+    if (!foundProduct) throw new NotFoundError('Product not found!');
     const comment = new Comment({
       comment_productId: productId,
       comment_userId: userId,
@@ -63,28 +66,22 @@ class CommentService {
     limit = 50,
     offset,
   }) {
+    let comments;
     if (parentCommentId) {
       const parent = await Comment.findById(parentCommentId);
       if (!parent) throw new NotFoundError('Not found comment');
-      const comments = await Comment.find({
+      comments = Comment.find({
         comment_productId: convertToObjectIdMongodb(productId),
         comment_left: { $gt: parent.comment_left },
         comment_right: { $lte: parent.comment_right },
-      })
-        .select({
-          comment_left: 1,
-          comment_right: 1,
-          comment_content: 1,
-          comment_parentId: 1,
-        })
-        .sort({ comment_left: 1 });
-      return comments;
+      });
+    } else {
+      comments = Comment.find({
+        comment_productId: convertToObjectIdMongodb(productId),
+        comment_parentId: null,
+      });
     }
-
-    const comments = await Comment.find({
-      comment_productId: convertToObjectIdMongodb(productId),
-      comment_parentId: null,
-    })
+    return await comments
       .select({
         comment_left: 1,
         comment_right: 1,
@@ -92,7 +89,41 @@ class CommentService {
         comment_parentId: 1,
       })
       .sort({ comment_left: 1 });
-    return comments;
+  }
+
+  static async deleteComment({ commentId, productId }) {
+    const foundProduct = await ProductService.findProductById({ productId });
+    if (!foundProduct) throw new NotFoundError('Product not found!');
+    const foundComment = await Comment.findById(commentId);
+    if (!foundComment) throw new NotFoundError('Comment not found!');
+
+    const leftValue = foundComment.comment_left;
+    const rightValue = foundComment.comment_right;
+    const width = rightValue - leftValue + 1;
+    await Comment.deleteMany({
+      comment_productId: convertToObjectIdMongodb(productId),
+      comment_left: { $gte: leftValue, $lte: rightValue },
+    });
+
+    await Comment.updateMany(
+      {
+        comment_productId: convertToObjectIdMongodb(productId),
+        comment_right: { $gt: rightValue },
+      },
+      {
+        $inc: { comment_right: -width },
+      },
+    );
+
+    await Comment.updateMany(
+      {
+        comment_productId: convertToObjectIdMongodb(productId),
+        comment_left: { $gt: rightValue },
+      },
+      {
+        $inc: { comment_left: -width },
+      },
+    );
   }
 }
 

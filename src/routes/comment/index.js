@@ -6,5 +6,6 @@ const router = express.Router();
 
 router.post('/', asyncHandler(commentController.createComment));
 router.get('/', asyncHandler(commentController.getCommentsByParentId));
+router.delete('/', asyncHandler(commentController.deleteComment));
 
 module.exports = router;

@@ -29,7 +29,7 @@ const listNotificationsByUser = async ({
 }) => {
   const match = { notification_receiverId: userId };
   if (type !== 'ALL') match['notification_type'] = type;
-  return Notification.aggregate([
+  return await Notification.aggregate([
     {
       $match: match,
     },

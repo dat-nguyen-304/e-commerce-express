@@ -4,10 +4,6 @@ const asyncHandler = require('../../helpers/asyncHandler');
 const { authentication } = require('../../auth/authUtils');
 const router = express.Router();
 
-router.get(
-  '/',
-  authentication,
-  asyncHandler(notificationController.listNotificationsByUser),
-);
+router.get('/', asyncHandler(notificationController.listNotificationsByUser));
 
 module.exports = router;

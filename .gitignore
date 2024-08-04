@@ -1,2 +1,4 @@
-node_modules
-.env
+e-commerce/node_modules
+e-commerce/.env
+message-queue-sys/node_modules
+message-queue-sys/.env

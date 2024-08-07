@@ -1,9 +1,8 @@
 const { consumerQueue, connectToRabbitMQ } = require("../dbs/rabbit.init");
 
-const log = console.log;
-console.log = function () {
-  log.apply(console, [new Date()].concat(arguments));
-};
+// console.log = function () {
+//   console.log.apply(console, [new Date()].concat(arguments));
+// };
 
 const messageService = {
   consumerToQueue: async (queueName) => {
@@ -15,11 +14,13 @@ const messageService = {
     }
   },
 
-  consumerToNormalQueue: async (queueName) => {
+  consumerToNormalQueue: async () => {
     try {
       const { channel, connection } = await connectToRabbitMQ();
       const notificationQueue = "notificationQueue";
-      const expiredTime = 12000;
+
+      //handle TTL
+      /*const expiredTime = 12000;
       setTimeout(() => {
         channel.consume(notificationQueue, (msg) => {
           console.log(
@@ -28,13 +29,28 @@ const messageService = {
           );
           channel.ack(msg);
         });
-      }, expiredTime);
+      }, expiredTime);*/
+
+      //handle logic
+      channel.consume(notificationQueue, (msg) => {
+        try {
+          const numberTest = Math.random();
+          console.log({ numberTest });
+          if (numberTest < 0.6) {
+            throw new Error("Send notification failed. Hot fix!");
+          }
+          console.log("Send notification successfully", msg.content.toString());
+          channel.ack(msg);
+        } catch (error) {
+          channel.nack(msg, false, false);
+        }
+      });
     } catch (error) {
       console.error(error);
     }
   },
 
-  consumerToFailedQueue: async (queueName) => {
+  consumerToFailedQueue: async () => {
     try {
       const { channel, connection } = await connectToRabbitMQ();
       const DLXNotificationDirectExchange = "DLXNotificationDirectExchange";
@@ -58,7 +74,7 @@ const messageService = {
       await channel.consume(
         queueResult.queue,
         (failedMsg) => {
-          console.log(`This notification error `, failedMsg.content.toString());
+          console.log("This is notification error ", failedMsg.content.toString());
         },
         {
           noAck: true,

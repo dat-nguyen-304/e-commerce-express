@@ -1,10 +1,9 @@
 const amqp = require('amqplib');
 const messages = 'hello 123';
 
-const log = console.log;
-console.log = function () {
-  log.apply(console, [new Date()].concat(arguments));
-};
+// console.log = function () {
+//   console.log.apply(console, [new Date()].concat(arguments));
+// };
 
 const runProducer = async () => {
   try {

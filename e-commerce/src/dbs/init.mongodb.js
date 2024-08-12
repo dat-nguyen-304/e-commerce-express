@@ -20,7 +20,7 @@ class Database {
           mongoose.connections.length,
         ),
       )
-      .catch((err) => console('Error', err));
+      .catch((err) => console.log('Error', err));
   }
 
   static getInstance() {

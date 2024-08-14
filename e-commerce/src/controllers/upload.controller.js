@@ -3,6 +3,7 @@ const { BadRequestError } = require('../core/error.response');
 const {
   uploadImageFromUrl,
   uploadImageFromLocal,
+  uploadImageFromLocalS3,
 } = require('../services/upload.service');
 
 class UploadController {
@@ -23,6 +24,17 @@ class UploadController {
       metadata: await uploadImageFromLocal({
         path: file.path,
       }),
+    }).send(res);
+  };
+
+  uploadToS3 = async (req, res, next) => {
+    const { file } = req;
+    if (!file) {
+      throw new BadRequestError('File missing');
+    }
+    new OK({
+      message: 'Upload to s3 successfully',
+      metadata: await uploadImageFromLocalS3({ file }),
     }).send(res);
   };
 }

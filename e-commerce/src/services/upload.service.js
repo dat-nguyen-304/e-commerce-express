@@ -1,4 +1,7 @@
 const cloudinary = require('../configs/cloudinary.config');
+const { s3, PutObjectCommand } = require('../configs/s3.config');
+const crypto = require('crypto');
+require('dotenv').config();
 
 //upload from url
 const uploadImageFromUrl = async () => {
@@ -41,7 +44,27 @@ const uploadImageFromLocal = async ({
   }
 };
 
+//use s3
+const uploadImageFromLocalS3 = async ({ file }) => {
+  try {
+    const randomImageName = () => crypto.randomBytes(16).toString('hex');
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: randomImageName(),
+      Body: file.buffer,
+      ContentType: 'image/jpeg',
+    });
+
+    const result = await s3.send(command);
+    console.log(result);
+    return result;
+  } catch (error) {
+    console.log('Upload error', error);
+  }
+};
+
 module.exports = {
   uploadImageFromUrl,
   uploadImageFromLocal,
+  uploadImageFromLocalS3,
 };

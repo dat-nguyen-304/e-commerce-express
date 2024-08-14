@@ -1,5 +1,10 @@
 const cloudinary = require('../configs/cloudinary.config');
-const { s3, PutObjectCommand } = require('../configs/s3.config');
+const {
+  s3,
+  PutObjectCommand,
+  GetObjectCommand,
+} = require('../configs/s3.config');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const crypto = require('crypto');
 require('dotenv').config();
 
@@ -47,17 +52,21 @@ const uploadImageFromLocal = async ({
 //use s3
 const uploadImageFromLocalS3 = async ({ file }) => {
   try {
-    const randomImageName = () => crypto.randomBytes(16).toString('hex');
-    const command = new PutObjectCommand({
+    const randomImageName = crypto.randomBytes(16).toString('hex');
+    const putCommand = new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
-      Key: randomImageName(),
+      Key: randomImageName,
       Body: file.buffer,
       ContentType: 'image/jpeg',
     });
 
-    const result = await s3.send(command);
-    console.log(result);
-    return result;
+    await s3.send(putCommand);
+    const getCommand = new GetObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: randomImageName,
+    });
+    const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+    return url;
   } catch (error) {
     console.log('Upload error', error);
   }

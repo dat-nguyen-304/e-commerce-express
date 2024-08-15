@@ -4,9 +4,11 @@ const {
   PutObjectCommand,
   GetObjectCommand,
 } = require('../configs/s3.config');
-const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const { getSignedUrl } = require('@aws-sdk/cloudfront-signer');
+// const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const crypto = require('crypto');
 require('dotenv').config();
+const publicUrl = 'https://dspyqji4hx2g2.cloudfront.net';
 
 //upload from url
 const uploadImageFromUrl = async () => {
@@ -61,12 +63,21 @@ const uploadImageFromLocalS3 = async ({ file }) => {
     });
 
     await s3.send(putCommand);
-    const getCommand = new GetObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Key: randomImageName,
+    // const getCommand = new GetObjectCommand({
+    //   Bucket: process.env.AWS_BUCKET_NAME,
+    //   Key: randomImageName,
+    // });
+    // const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+
+    const url = await getSignedUrl({
+      url: `${publicUrl}/${randomImageName}`,
+      keyPairId: 'K2LVOMP2ND9P1M',
+      dateLessThan: new Date(Date.now() + 60000), //60s
+      privateKey: process.env.AWS_CLOUDFRONT_PRIVATE_KEY,
     });
-    const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
-    return url;
+    return {
+      url,
+    };
   } catch (error) {
     console.log('Upload error', error);
   }

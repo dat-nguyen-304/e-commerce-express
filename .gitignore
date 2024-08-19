@@ -1,4 +1,5 @@
 e-commerce/node_modules
 e-commerce/.env
+e-commerce/logs
 message-queue-sys/node_modules
 message-queue-sys/.env

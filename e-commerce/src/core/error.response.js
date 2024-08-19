@@ -1,4 +1,5 @@
-const logger = require('../loggers/winston.log');
+// const logger = require('../loggers/winston.log');
+const myLogger = require('../loggers/my-logger.log');
 
 const StatusCode = {
   BAD_REQUEST: 400,
@@ -20,7 +21,12 @@ class ErrorResponse extends Error {
   constructor(message, status) {
     super(message);
     this.status = status;
-    logger.error(`${this.status} - ${this.message}`);
+    // logger.error(`${this.status} - ${this.message}`);
+    myLogger.error(this.message, [
+      '/api/v1/login',
+      'UUUAAA',
+      { error: 'Bad request' },
+    ]);
   }
 }
 

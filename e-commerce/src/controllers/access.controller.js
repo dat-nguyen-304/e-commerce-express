@@ -1,8 +1,11 @@
+const { BadRequestError } = require('../core/error.response');
 const { CREATED, OK } = require('../core/success.response');
 const AccessService = require('../services/access.service');
 
 class AccessController {
   login = async (req, res, next) => {
+    const email = req.body.email;
+    if (!email) throw new BadRequestError('Email missing');
     new OK({
       metadata: await AccessService.login(req.body),
     }).send(res);

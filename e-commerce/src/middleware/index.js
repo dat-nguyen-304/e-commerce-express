@@ -1,4 +1,4 @@
-const Logger = require('../loggers/discord.service');
+const Logger = require('../loggers/discord.log');
 
 const pushToLogDiscord = async (req, res, next) => {
   try {

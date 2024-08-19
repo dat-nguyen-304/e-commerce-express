@@ -1,3 +1,5 @@
+const logger = require('../loggers/winston.log');
+
 const StatusCode = {
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
@@ -18,6 +20,7 @@ class ErrorResponse extends Error {
   constructor(message, status) {
     super(message);
     this.status = status;
+    logger.error(`${this.status} - ${this.message}`);
   }
 }
 

@@ -6,13 +6,14 @@ class MyLogger {
   constructor() {
     const formatPrint = format.printf(
       ({ level, message, context, requestId, timestamp, metadata }) => {
-        return `${timestamp}:${level}:${context}:${requestId}:${message}:${JSON.stringify(metadata)}`;
+        return `${timestamp}: ${level}: ${context}: ${requestId}: ${message}: ${JSON.stringify(metadata)}`;
       },
     );
 
     this.logger = createLogger({
       format: format.combine(
         format.timestamp({ format: 'YYYY-MM-DD hh:mm:ss.SSS A' }),
+        format.align(),
         formatPrint,
       ),
       transports: [

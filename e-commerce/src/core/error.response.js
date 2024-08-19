@@ -7,6 +7,7 @@ const StatusCode = {
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   CONFLICT: 409,
+  INTERNAL_SERVER_ERROR: 500,
 };
 
 const StatusCodeReason = {
@@ -15,6 +16,7 @@ const StatusCodeReason = {
   FORBIDDEN: 'FORBIDDEN',
   NOT_FOUND: 'NOT_FOUND',
   CONFLICT: 'CONFLICT',
+  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
 };
 
 class ErrorResponse extends Error {
@@ -70,10 +72,20 @@ class ForbiddenError extends ErrorResponse {
   }
 }
 
+class RedisError extends ErrorResponse {
+  constructor(
+    message = StatusCodeReason.INTERNAL_SERVER_ERROR,
+    statusCode = StatusCode.INTERNAL_SERVER_ERROR,
+  ) {
+    super(message, statusCode);
+  }
+}
+
 module.exports = {
   UnauthorizedError,
   ConflictError,
   BadRequestError,
   NotFoundError,
   ForbiddenError,
+  RedisError,
 };

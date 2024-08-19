@@ -5,6 +5,7 @@ const { default: helmet } = require('helmet');
 const { v4: uuidv4 } = require('uuid');
 const myLogger = require('./loggers/my-logger.log');
 require('./dbs/init.mongodb');
+const redis = require('./dbs/init.redis');
 const { checkOverload } = require('./helpers/check.connect');
 const ProductTest = require('./tests/product.test');
 require('./tests/inventory.test');
@@ -21,6 +22,8 @@ app.use(
     extended: true,
   }),
 );
+
+redis.initRedis();
 
 app.use((req, res, next) => {
   const requestId = req.headers['x-request-id'];

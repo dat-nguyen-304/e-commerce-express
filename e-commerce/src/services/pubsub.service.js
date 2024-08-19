@@ -6,15 +6,23 @@ class PubsubService {
   }
 
   publish = async (channel, message) => {
-    const publisher = await this.client.connect();
-    publisher.publish(channel, message);
+    try {
+      const publisher = await this.client.connect();
+      publisher.publish(channel, message);
+    } catch (error) {
+      console.log('Publish error', error);
+    }
   };
 
   subscribe = async (channel, callback) => {
-    const subscriber = await this.client.duplicate().connect();
-    await subscriber.subscribe(channel, (message) => {
-      callback(message);
-    });
+    try {
+      const subscriber = await this.client.duplicate().connect();
+      await subscriber.subscribe(channel, (message) => {
+        callback(message);
+      });
+    } catch (error) {
+      console.log('Subscribe', error);
+    }
   };
 }
 

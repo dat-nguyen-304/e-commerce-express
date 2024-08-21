@@ -4,6 +4,10 @@ const asyncHandler = require('../../helpers/asyncHandler');
 const { authentication } = require('../../auth/authUtils');
 const router = express.Router();
 
+router.get('/sku', authentication, asyncHandler(productController.findOneSku));
+router.get('/spu', authentication, asyncHandler(productController.findOneSpu));
+router.post('/spu', authentication, asyncHandler(productController.createSpu));
+
 router.get(
   '/drafts',
   authentication,
@@ -25,6 +29,7 @@ router.patch(
   asyncHandler(productController.unpublishProductByShop),
 );
 router.get('/search/:keyword', asyncHandler(productController.searchProducts));
+
 router
   .route('/')
   .get(asyncHandler(productController.getAllProducts))
@@ -33,4 +38,5 @@ router
   .route('/:product_id')
   .get(asyncHandler(productController.getProduct))
   .patch(authentication, asyncHandler(productController.updateProduct));
+
 module.exports = router;

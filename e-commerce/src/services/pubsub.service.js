@@ -21,7 +21,7 @@ class PubsubService {
         callback(message);
       });
     } catch (error) {
-      console.log('Subscribe', error);
+      console.log('Subscribe error', error);
     }
   };
 }

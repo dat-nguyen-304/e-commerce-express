@@ -42,6 +42,10 @@ const updateNestedObjectParser = (obj) => {
   return final;
 };
 
+const randomProductId = () => {
+  return Math.floor(Math.random() * 899999 + 1000000);
+};
+
 module.exports = {
   convertToObjectIdMongodb,
   getInfoData,
@@ -49,4 +53,5 @@ module.exports = {
   unGetSelectData,
   removeUndefinedObject,
   updateNestedObjectParser,
+  randomProductId,
 };
